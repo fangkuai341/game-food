@@ -103,7 +103,22 @@ const checkValuesInRange = (
 };
 const click = () => {
   //判断点击是否是正确的
-  console.log(zhizhengRef.value.offsetLeft);
+  const left = zhizhengRef.value.offsetLeft;
+  //获取正确的范围，和失败的范围
+  const key = foodOver[nowFoodNUmber.value]; // 将 'pg' 存储在变量中
+  const correctArray = nowFoodLocation.value
+    .filter((item) => item[key])
+    .map((item) => ({
+      start: item[key].start,
+      end: item[key].end,
+    }));
+    const failArray = nowFoodLocation.value
+    .filter(item => !item[key]) // 只保留不包含变量所指向的键的对象
+    .map(item => ({
+        start: item, // 根据你的需要，这里可以修改为其他键
+        end: item      // 根据你的需要，这里可以修改为其他键
+    }));
+    console.log(left, correctArray, failArray);
 };
 const generateUniqueValuesUntilValid = (
   startValues: number[],
@@ -136,9 +151,18 @@ const success = () => {
   //加入下一个食材和一个新的食材
   //1.获取不能写的位置和当前的个数（遍历）
   const nowLength = nowFoodLocation.value.length;
-  const startValues = nowFoodLocation.value.map(
-    (item) => Object.values(item)[0].start
-  );
+  let newUniqueValues;
+  if (nowLength) {
+    const startValues = nowFoodLocation.value.map(
+      (item) => Object.values(item)[0].start
+    );
+    newUniqueValues = generateUniqueValuesUntilValid(
+      startValues,
+      3 - nowLength
+    );
+  } else {
+    newUniqueValues = generateUniqueValues(3);
+  }
 
   let nowFood = [];
   nowFood.push(foodOver[nowFoodNUmber.value]);
@@ -147,10 +171,7 @@ const success = () => {
   }
 
   //获取uniqueValues是否在startValues-20到startValues+20之内，如果在重新生成
-  let newUniqueValues = generateUniqueValuesUntilValid(
-    startValues,
-    3 - nowLength
-  );
+
   nowFood.forEach((item, index) => {
     nowFoodLocation.value.push({
       [item]: {
