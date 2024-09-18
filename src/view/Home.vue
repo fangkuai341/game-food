@@ -1,8 +1,5 @@
 <template>
   <div>
-    <button @click="success">正确点击</button>
-    <button @click="error">错误点击</button>
-    <button>未点击上去</button>
     <button @mousedown="click">点击</button>
     <div
       style="
@@ -112,13 +109,34 @@ const click = () => {
       start: item[key].start,
       end: item[key].end,
     }));
-    const failArray = nowFoodLocation.value
-    .filter(item => !item[key]) // 只保留不包含变量所指向的键的对象
-    .map(item => ({
-        start: item, // 根据你的需要，这里可以修改为其他键
-        end: item      // 根据你的需要，这里可以修改为其他键
-    }));
-    console.log(left, correctArray, failArray);
+  const failArray = nowFoodLocation.value.reduce((acc, item) => {
+    // 获取对象的键
+    const itemKey = Object.keys(item)[0];
+
+    // 只处理不包含 'pg' 的对象
+    if (itemKey !== key) {
+      const { start, end } = item[itemKey];
+      acc.push({ start, end });
+    }
+    return acc;
+  }, []);
+
+  console.log(left, correctArray, failArray);
+  debugger
+  for (let i = 0; i < correctArray.length; i++) {
+    if (isInRange(left, correctArray[i].start, correctArray[i].end)) {
+      console.log("成功");
+      success();
+      return;
+    }
+  }
+  for (let i = 0; i < failArray.length; i++) {
+    if (isInRange(left, failArray[i].start, failArray[i].end )) {
+      console.log("失败");
+      error();
+      return;
+    }
+  }
 };
 const generateUniqueValuesUntilValid = (
   startValues: number[],
@@ -140,7 +158,6 @@ const success = () => {
     return;
   }
   //1.去除nowFoodLocation的当前食材和其中一个食材
-
   nowFoodLocation.value = removeKeyAndRandomValueFromArray(
     nowFoodLocation.value,
     foodOver[nowFoodNUmber.value]
@@ -217,7 +234,7 @@ onMounted(() => {
 
 <style>
 .zhizheng {
-  animation: zhizheng 6s linear infinite;
+  animation: zhizheng 8s linear infinite;
 }
 @keyframes zhizheng {
   0% {
