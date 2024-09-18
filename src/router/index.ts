@@ -1,12 +1,19 @@
 import { createMemoryHistory, createRouter } from 'vue-router'
 
+import Game from '../view/Game.vue'
 import Home from '../view/Home.vue'
 
 const routes = [
-{
+  {
     path: '/',
-    name: 'Home',
+    name: 'home',
     component: Home,
+
+  },
+{
+    path: '/game',
+    name: 'game',
+    component: Game,
 }
 ]
 
