@@ -1,6 +1,6 @@
 <
 <template>
-  <div>
+  <div style="margin-top: 10px">
     <div v-if="!start">
       <button style="margin-bottom: 30px" @click="start = true">开始</button>
       <div style="font-size: 12px; color: #333">
@@ -13,7 +13,8 @@
       </div>
     </div>
     <div v-else>
-      <img :src="getImageUrl(foodsList[index].img)" style="width: 300px" />
+      <div>{{ foodsList[index].name }}</div>
+      <img :src="getImageUrl(foodsList[index].kImg)" style="height: 100px" />
       <div style="display: flex; flex-wrap: wrap">
         <div
           v-for="(item, indexa) in foodsList[index].children"
@@ -32,17 +33,27 @@
           <div v-else></div>
         </div>
       </div>
-      <button>制作</button>
+      <button
+        @click="
+          router.push({
+            name: 'game',
+            query: { food: JSON.stringify(foodsList[index]) },
+          })
+        "
+      >
+        制作
+      </button>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { foodsList } from "./data.data";
+import { useRouter } from "vue-router";
 import { ref } from "vue";
 const start = ref(false);
 const index = Math.floor(Math.random() * 3);
-
+const router = useRouter();
 function getImageUrl(imageName: string) {
   return new URL(`../assets/img/${imageName}`, import.meta.url).href;
 }
