@@ -1,70 +1,118 @@
 <template>
   <div style="margin-top: 20px">
-    <div>
-      <div style="display: flex; position: relative; height: 30px">
-        <div
-          v-for="(item, index) in foodOver"
-          :key="index"
-          class="foodAnm"
-          style="top: 0"
-        >
-          <img
-            :src="getImageUrl(item.kImg)"
-            alt=""
-            style="width: 60px; margin-left: 10px"
-          />
-        </div>
-      </div>
-      <div
-        style="width: 70px; height: 70px; background: blue; margin-top: 60px"
-      ></div>
-    </div>
-
     <div
+      v-if="isSuccess === 1"
       style="
-        height: 20px;
-        width: 400px;
-        background: #66aaee;
-        position: relative;
-        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100vh;
       "
     >
-      <div
-        v-for="(item, index) in nowFoodLocation"
-        :key="index"
-        style="
-          height: 20px;
-          width: 20px;
-
-          position: absolute;
-        "
-        :style="{
-          backgroundColor: colorList[Math.floor(Math.random() * 12)],
-          left: item[Object.keys(item)[0]].start + 'px',
-        }"
-      >
-        <div>
-          <img
-            :src="
-              getImageUrl(
-                allFood.find((food) => food.id === Object.keys(item)[0]).kImg
-              )
-            "
-            alt=""
-            style="height: 50px; position: absolute; top: 100%; left: -50%"
-          />
-          <div style="width: 100px; position: absolute; top: 70px; left: -50%">
-            {{ allFood.find((food) => food.id === Object.keys(item)[0]).name }}
+      <div>成功</div>
+      <button style="margin-top: 10px" @click="back">返回</button>
+    </div>
+    <div
+      v-else-if="isSuccess === -1"
+      style="
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        height: 100vh;
+      "
+    >
+      <div>失败</div>
+      <button style="margin-top: 10px" @click="back">重新开始</button>
+    </div>
+    <div v-else>
+      <div style="display: flex; flex-direction: column">
+        <div style="display: flex; position: relative; height: 30px">
+          <div
+            v-for="(item, index) in foodOver"
+            :key="index"
+            class="foodAnm"
+            style="top: 0"
+          >
+            <img
+              :src="getImageUrl(item.kImg)"
+              alt=""
+              style="width: 60px; margin-left: 10px"
+            />
           </div>
         </div>
+        <img
+          :src="getImageUrl('1.png')"
+          style="
+            width: 90px;
+            height: 70px;
+            margin-top: 60px;
+            position: relative;
+            z-index: 999;
+          "
+        />
       </div>
+
       <div
-        style="width: 2px; height: 20px; background: yellow; position: absolute"
-        class="zhizheng"
-        ref="zhizhengRef"
-      ></div>
+        style="
+          height: 20px;
+          width: 400px;
+          background: #66aaee;
+          position: relative;
+          margin-top: 30px;
+        "
+      >
+        <div
+          v-for="(item, index) in nowFoodLocation"
+          :key="index"
+          style="
+            height: 20px;
+            width: 20px;
+
+            position: absolute;
+          "
+          :style="{
+            backgroundColor: colorList[Math.floor(Math.random() * 12)],
+            left: item[Object.keys(item)[0]].start + 'px',
+          }"
+        >
+          <div>
+            <img
+              :src="
+                getImageUrl(
+                  allFood.find((food) => food.id === Object.keys(item)[0]).kImg
+                )
+              "
+              alt=""
+              style="height: 50px; position: absolute; top: 100%; left: -50%"
+            />
+            <div
+              :style="{ top: `${70 + 14 * index}px` }"
+              style="
+                width: 100px;
+                position: absolute;
+                left: -50%;
+                transform: translateX(-25%);
+              "
+            >
+              {{
+                allFood.find((food) => food.id === Object.keys(item)[0]).name
+              }}
+            </div>
+          </div>
+        </div>
+        <div
+          style="
+            width: 2px;
+            height: 20px;
+            background: yellow;
+            position: absolute;
+          "
+          class="zhizheng"
+          ref="zhizhengRef"
+        ></div>
+      </div>
+      <button style="margin-top: 100px" @mousedown="click">点击</button>
     </div>
-    <button style="margin-top: 100px" @mousedown="click">点击</button>
   </div>
 </template>
 
@@ -72,8 +120,9 @@
 import { onMounted, ref } from "vue";
 import type { allFoodType } from "./type.data";
 import { allFood, colorList } from "./data.data";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 const route = useRoute();
+const router = useRouter();
 const food = JSON.parse(route.query.food);
 const foodOver = food.children; //食材顺序
 
@@ -81,6 +130,7 @@ const nowFoodNUmber = ref<number>(0); //当前食材
 const nowFoodLocation = ref<allFoodType[]>([]); //当前食材位置和食材
 const errorCount = ref<number>(0); //错误次数
 const zhizhengRef = ref<HTMLElement | null>(null);
+const isSuccess = ref<number>(0);
 function getImageUrl(imageName: string) {
   return new URL(`../assets/img/${imageName}`, import.meta.url).href;
 }
@@ -183,6 +233,11 @@ const click = () => {
       return;
     }
   }
+  errorCount.value++;
+  if (errorCount.value >= 5) {
+    isSuccess.value = -1;
+    return;
+  }
 };
 const generateUniqueValuesUntilValid = (
   startValues: number[],
@@ -206,7 +261,7 @@ const success = () => {
     "100px";
 
   if (nowFoodNUmber.value >= foodOver.length - 1) {
-    console.log("成功");
+    isSuccess.value = 1;
     return;
   }
   //1.去除nowFoodLocation的当前食材和其中一个食材
@@ -254,6 +309,10 @@ const success = () => {
 const error = () => {
   //重新获取
   errorCount.value++;
+  if (errorCount.value >= 5) {
+    isSuccess.value = -1;
+    return;
+  }
   nowFoodLocation.value = [];
   let nowFood = [];
   nowFood.push(foodOver[nowFoodNUmber.value].id);
@@ -267,6 +326,9 @@ const error = () => {
     });
   });
   console.log(JSON.stringify(nowFoodLocation.value));
+};
+const back = () => {
+  router.push("/");
 };
 onMounted(() => {
   let nowFood = [];

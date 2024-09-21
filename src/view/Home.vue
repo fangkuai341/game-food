@@ -52,7 +52,7 @@ import { foodsList } from "./data.data";
 import { useRouter } from "vue-router";
 import { ref } from "vue";
 const start = ref(false);
-const index = Math.floor(Math.random() * 3);
+const index = Math.floor(Math.random() * 5);
 const router = useRouter();
 function getImageUrl(imageName: string) {
   return new URL(`../assets/img/${imageName}`, import.meta.url).href;
